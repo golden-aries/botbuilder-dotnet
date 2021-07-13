@@ -7,6 +7,21 @@
 # Variable 'runCodesignValidationInjection' was defined in the Variables tab
 # Variable 'skipComponentGovernanceDetection' was defined in the Variables tab
 # Variable 'version' was defined in the Variables tab
+parameters:
+- name: image
+  displayName: Pool Image
+  type: string
+  default: ubuntu-latest
+  values:
+  - windows-latest
+  - vs2017-win2016
+  - ubuntu-latest
+  - ubuntu-16.04
+  - macOS-latest
+  - macOS-10.14
+
+trigger: none
+
 resources:
   repositories:
   - repository: self
