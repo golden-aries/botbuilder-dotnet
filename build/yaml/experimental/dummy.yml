@@ -1,0 +1,94 @@
+# 'Allow scripts to access the OAuth token' was selected in pipeline.  Add the following YAML to any steps requiring access:
+#       env:
+#           MY_ACCESS_TOKEN: $(System.AccessToken)
+# Variable 'CommitHash' was defined in the Variables tab
+# Variable 'DateStamp' was defined in the Variables tab
+# Variable 'PackageVersion' was defined in the Variables tab
+# Variable 'runCodesignValidationInjection' was defined in the Variables tab
+# Variable 'skipComponentGovernanceDetection' was defined in the Variables tab
+# Variable 'version' was defined in the Variables tab
+resources:
+  repositories:
+  - repository: self
+    type: git
+    ref: main
+jobs:
+- job: Job_1
+  displayName: 'Agent job 1 '
+  pool:
+    vmImage: windows-2019
+  steps:
+  - checkout: self
+    persistCredentials: True
+  - task: tagBuildOrRelease@0
+    displayName: Tag Build with Build.Reason=$(Build.Reason) NextBuild=$(NextBuild)
+    condition: and(succeeded(), ne(variables['System.PullRequest.IsFork'], 'True'))
+    continueOnError: True
+    enabled: False
+    inputs:
+      tags: >-
+        Region=$(Region)
+
+        Build.Reason=$(Build.Reason)
+
+        PullRequestTitle=$(PullRequestTitle)
+
+        PullRequestNumber=$(PullRequestNumber)
+  - task: PowerShell@2
+    displayName: Display env vars
+    condition: succeededOrFailed()
+    inputs:
+      targetType: inline
+      script: gci env:* | sort-object name | Format-Table -AutoSize -Wrap
+  - task: PowerShell@2
+    displayName: Execute tests
+    condition: "and(succeeded(), contains(variables['MatchingPathFilters'], 'tests/')) "
+    enabled: False
+    inputs:
+      targetType: inline
+      script: Write-Host "Executing this one";
+  - task: PowerShell@2
+    displayName: Set env vars
+    enabled: False
+    inputs:
+      targetType: inline
+      script: >
+        echo '##vso[task.setvariable variable=AppId]$(WinTestBotAppId)'
+
+
+        echo '##vso[task.setvariable variable=SecretVarViaEcho]$env:SV'
+
+        Write-Host '##vso[task.setvariable variable=SecretVarViaWriteHost]$env:SV'
+
+
+        Write-Host "secret: $env:SV"
+
+        Write-Host "Bot Group: $(LinuxTestBotBotGroup)"
+
+
+        if ("$(SecretVar)" -eq "secretsecretsecret") {
+          Write-Host '1 equal'
+        } else {
+          Write-Host '1 not'
+        }
+
+        if ("$(LinuxTestBotBotGroup)" -eq "NightlyLinuxTestBotRG") {
+          Write-Host '2 equal'
+        } else {
+          Write-Host '2 not'
+        }
+  - task: PowerShell@2
+    displayName: Dir workspace except node_modules
+    condition: succeededOrFailed()
+    continueOnError: True
+    enabled: False
+    inputs:
+      targetType: inline
+      script: Get-ChildItem .. -ErrorAction Continue -Recurse -Force | Where {$_.FullName -notlike "*node_modules*"}
+  - task: CmdLine@2
+    displayName: Dir workspace 2 (windows)
+    condition: succeededOrFailed()
+    continueOnError: True
+    inputs:
+      script: dir .. /s
+...
