@@ -110,6 +110,10 @@ namespace Microsoft.Bot.Builder
             {
                 // do nothing
             }
+            catch (NullReferenceException)
+            {
+                // do nothing
+            }
         }
 
         private static async Task SendTypingActivityAsync(ITurnContext turnContext, CancellationToken cancellationToken)
