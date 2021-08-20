@@ -26,7 +26,7 @@ namespace Microsoft.Bot.Connector.Authentication
         /// <summary>
         /// Initializes a new instance of the <see cref="MsalServiceClientCredentialsFactory"/> class.
         /// </summary>
-        /// <param name="configuration"><see cref="Configuration"/> where to get the AppId from.</param>
+        /// <param name="configuration"><see cref="IConfiguration"/> where to get the AppId from.</param>
         /// <param name="clientApplication"><see cref="IConfidentialClientApplication"/> used to acquire tokens.</param>
         /// <param name="logger">Optional <see cref="ILogger"/> for credential acquisition telemetry.</param>
         public MsalServiceClientCredentialsFactory(IConfiguration configuration, IConfidentialClientApplication clientApplication, ILogger logger = null)
